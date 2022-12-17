@@ -88,19 +88,28 @@ resource "aws_security_group" "maze_sg" {
   vpc_id      = aws_vpc.maze_vpc.id
 }
 
-resource "aws_security_group_rule" "ingress_all" {
+resource "aws_security_group_rule" "ingress_http" {
   type              = "ingress"
-  from_port         = 0
-  to_port           = 65535
-  protocol          = "-1" #Specifies any protocol (udp,tcp and icmp)
-  cidr_blocks       = [var.access_ip]
+  from_port         = 80
+  to_port           = 80
+  protocol          = "-1"
+  cidr_blocks       = [var.access_ip, var.cloud9_ip]
+  security_group_id = aws_security_group.maze_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_ssh" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "-1"
+  cidr_blocks       = [var.access_ip, var.cloud9_ip]
   security_group_id = aws_security_group.maze_sg.id
 }
 
 resource "aws_security_group_rule" "egress_all" {
   type              = "egress"
   from_port         = 0
-  to_port           = 65535
+  to_port           = 0
   protocol          = "-1" #Specifies any protocol (udp,tcp and icmp)
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.maze_sg.id
