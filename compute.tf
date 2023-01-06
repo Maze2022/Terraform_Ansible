@@ -52,9 +52,11 @@ resource "null_resource" "httpd_update" {
 
     connection {
       type        = "ssh"
-      user        = "Amazon-linux-2"
+      user        = "ec2-user"
       private_key = file("/home/ec2-user/.ssh/maze2key")
+      timeout     = "2m"
       host        = aws_instance.maze_main[count.index].public_ip
+      agent       = false
     }
   }
 }
