@@ -1,0 +1,4 @@
+---
+- name: Install apache
+  hosts: hosts
+  
