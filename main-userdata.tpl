@@ -7,16 +7,3 @@ sudo apt-get -y update &&
 sudo apt-get -y install grafana &&
 sudo systemctl start grafana-server &&
 sudo systemctl enable grafana-server.service
-
-
-
-
-
-
-
-{{!--#!/bin/bash--}}
-{{!--sudo hostnamectl set-hostname ${new_hostname}--}}
-{{!--sudo yum update -y--}}
-{{!--sudo yum install -y httpd--}}
-{{!--sudo systemctl start httpd--}}
-{{!--sudo systemctl enable httpd--}}
