@@ -1,11 +1,11 @@
 data "aws_ami" "server_ami" {
   most_recent = true
 
-  owners = ["137112412989"]
+  owners = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-5.10-hvm-2.0.*.0-x86_64-gp2"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 }
 
@@ -35,28 +35,28 @@ resource "aws_instance" "maze_main" {
     Name = "maze-main-${random_id.maze_node_id[count.index].dec}"
   }
 
-  provisioner "local-exec" {
-    command = "printf '\n${self.public_ip}' >> aws_hosts"
-  }
+#   provisioner "local-exec" {
+#     command = "printf '\n${self.public_ip}' >> aws_hosts"
+#   }
 
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sed -i '/^[0-9]/d' aws_hosts"
-  }
-}
+#   provisioner "local-exec" {
+#     when    = destroy
+#     command = "sed -i '/^[0-9]/d' aws_hosts"
+#   }
+# }
 
-resource "null_resource" "httpd_update" {
-  count = var.main_instance_count
-  provisioner "remote-exec" {
-    inline = ["sudo yum upgrade -y httpd && touch upgrade.log && echo 'I updated HTTPD' >> upgrade.log"]
+# resource "null_resource" "httpd_update" {
+#   count = var.main_instance_count
+#   provisioner "remote-exec" {
+#     inline = ["sudo yum upgrade -y httpd && touch upgrade.log && echo 'I updated HTTPD' >> upgrade.log"]
 
-    connection {
-      type        = "ssh"
-      user        = "ec2-user"
-      private_key = file("/home/ec2-user/.ssh/maze2key")
-      timeout     = "2m"
-      host        = aws_instance.maze_main[count.index].public_ip
-      agent       = false
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       user        = "Ubuntu"
+#       private_key = file("/home/ubuntu/.ssh/1mazeKey")
+#       timeout     = "2m"
+#       host        = aws_instance.maze_main[count.index].public_ip
+#       agent       = false
+#     }
+#   }
 }
