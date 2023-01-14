@@ -8,6 +8,11 @@ variable "access_ip" {
   default = "0.0.0.0/0" # if providing multiple ip's, you can wrap this in []
 }
 
+variable "cloud9_ip" {
+  type    = string
+  default = "54.203.101.72/32"
+}
+
 variable "main_instance_type" {
   type    = string
   default = "t2.micro"
@@ -31,7 +36,3 @@ variable "public_key_path" {
   type = string
 }
 
-variable "cloud9_ip" {
-  type    = string
-  default = "34.223.207.63/32"
-}
