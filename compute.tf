@@ -35,28 +35,28 @@ resource "aws_instance" "maze_main" {
     Name = "maze-main-${random_id.maze_node_id[count.index].dec}"
   }
 
-#   provisioner "local-exec" {
-#     command = "printf '\n${self.public_ip}' >> aws_hosts"
-#   }
+  provisioner "local-exec" {                              #Provisioner allows you run a arbitruary command locally using the local exec provisioner
+    command = "printf '\n${self.public_ip}' >> aws_hosts" #export the IP address of the instances created to a file on the local server
+  }                                                       #Discouraged because outcome is not recorded in the state. It is not idempotent(have diff results if run more than once)
 
-#   provisioner "local-exec" {
-#     when    = destroy
-#     command = "sed -i '/^[0-9]/d' aws_hosts"
-#   }
-# }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sed -i '/^[0-9]/d' aws_hosts"
+  }
+}
 
-# resource "null_resource" "httpd_update" {
-#   count = var.main_instance_count
-#   provisioner "remote-exec" {
-#     inline = ["sudo yum upgrade -y httpd && touch upgrade.log && echo 'I updated HTTPD' >> upgrade.log"]
+resource "null_resource" "grafana_update" {
+  count = var.main_instance_count
+  provisioner "remote-exec" {
+    inline = ["sudo apt upgrade -y grafana && touch upgrade.log && echo 'I updated Grafana' >> upgrade.log"]
 
-#     connection {
-#       type        = "ssh"
-#       user        = "Ubuntu"
-#       private_key = file("/home/ubuntu/.ssh/1mazeKey")
-#       timeout     = "2m"
-#       host        = aws_instance.maze_main[count.index].public_ip
-#       agent       = false
-#     }
-#   }
+    connection {
+      type        = "ssh"
+      user        = "Ubuntu"
+      private_key = file("/home/ubuntu/.ssh/1mazeKey")
+      timeout     = "2m"
+      host        = aws_instance.maze_main[count.index].public_ip
+      agent       = false
+    }
+  }
 }
