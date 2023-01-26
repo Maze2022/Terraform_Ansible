@@ -26,7 +26,7 @@ resource "aws_instance" "maze_main" {
   key_name               = aws_key_pair.maze_auth.id
   vpc_security_group_ids = [aws_security_group.maze_sg.id]
   subnet_id              = aws_subnet.maze_public_subnet.*.id[count.index]
-  user_data              = templatefile("./main-userdata.tpl", { new_hostname = "maze-main-${random_id.maze_node_id[count.index].dec}" })
+  # user_data              = templatefile("./main-userdata.tpl", { new_hostname = "maze-main-${random_id.maze_node_id[count.index].dec}" })
   root_block_device {
     volume_size = var.main_vol_size
   }
@@ -45,18 +45,25 @@ resource "aws_instance" "maze_main" {
   }
 }
 
-resource "null_resource" "grafana_update" {
-  count = var.main_instance_count
-  provisioner "remote-exec" {
-    inline = ["sudo apt upgrade -y grafana && touch upgrade.log && echo 'I updated Grafana' >> upgrade.log"]
+# resource "null_resource" "grafana_update" {
+#   count = var.main_instance_count
+#   provisioner "remote-exec" {
+#     inline = ["sudo apt upgrade -y grafana && touch upgrade.log && echo 'I updated Grafana' >> upgrade.log"]
 
-    connection {
-      type        = "ssh"
-      user        = "Ubuntu"
-      private_key = file("/home/ubuntu/.ssh/1mazeKey")
-      timeout     = "2m"
-      host        = aws_instance.maze_main[count.index].public_ip
-      agent       = false
-    }
+#     connection {
+#       type        = "ssh"
+#       user        = "Ubuntu"
+#       private_key = file("/home/ubuntu/.ssh/1mazeKey")
+#       timeout     = "2m"
+#       host        = aws_instance.maze_main[count.index].public_ip
+#       agent       = false
+#     }
+#   }
+# }
+
+resource "null_resource" "grafana_install" {
+  depends_on = [aws_instance.maze_main]
+  provisioner "local-exec" {
+    command = "ansible-playbook -i aws_hosts --key-file /home/ubuntu/.ssh/1mazeKey playbooks/grafana.yml"
   }
 }
