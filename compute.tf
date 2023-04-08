@@ -36,8 +36,11 @@ resource "aws_instance" "maze_main" {
   }
 
   provisioner "local-exec" {                              #Provisioner allows you run a arbitruary command locally using the local exec provisioner
-    command = "printf '\n${self.public_ip}' >> aws_hosts" #export the IP address of the instances created to a file on the local server
-  }                                                       #Discouraged because outcome is not recorded in the state. It is not idempotent(have diff results if run more than once)
+    command = "printf '\n${self.public_ip}' >> aws_hosts && aws ec2 wait instance-status-ok --instance-ids ${self.id} --region us-west-2"
+    }
+  # The ec2 wait instance-ok allows the instance to be spun up first before the Ansible provisioner connects to the instance and run all the plays from the playbook
+  #export the IP address of the instances created to a file on the local server
+  #Discouraged because outcome is not recorded in the state. It is not idempotent(have diff results if run more than once)
 
   provisioner "local-exec" {
     when    = destroy
@@ -67,3 +70,9 @@ resource "null_resource" "grafana_install" {
     command = "ansible-playbook -i aws_hosts --key-file /home/ubuntu/.ssh/1mazeKey playbooks/grafana.yml"
   }
 }
+
+
+output "grafana_access" {
+  value = {for i in aws_instance.maze_main[*] : i.tags.Name => "${i.public_ip}:3000"}
+}
+
